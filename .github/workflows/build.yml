@@ -8,12 +8,15 @@ on:
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    env:
+      NIX_IGNORE_SYSTEMD: 1
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@v21
         with:
           extra_nix_config: |
             build-users-group =
+            sandbox = false
       - name: Write secrets 4 droid
         env:
           KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
