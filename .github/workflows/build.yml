@@ -34,7 +34,7 @@ jobs:
          nix_conf: experimental-features = nix-command flakes
 
       - run: nix build -v
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: linux
           path: result/app/*
