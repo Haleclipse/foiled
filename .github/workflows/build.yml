@@ -9,14 +9,19 @@ jobs:
   build-android:
     runs-on: ubuntu-latest
     env:
-      NIX_IGNORE_SYSTEMD: 1
+      NIX_IGNORE_SYSTEMD: 1  # 确保所有作业继承此变量
     steps:
       - uses: actions/checkout@v3
+      - name: 前置安装系统依赖  # 新增关键步骤
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libseccomp-dev curl xz-utils
       - uses: nixbuild/nix-quick-install-action@v21
         with:
-          extra_nix_config: |
+          extra_nix_config: |  # 统一参数名
             build-users-group =
             sandbox = false
+            experimental-features = nix-command flakes
       - name: Write secrets 4 droid
         env:
           KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
@@ -31,12 +36,18 @@ jobs:
           path: build/app/outputs/flutter-apk/*.apk
   build-linux:
     runs-on: ubuntu-latest
+    env:
+      NIX_IGNORE_SYSTEMD: 1  # 必须同步配置
     steps:
       - uses: actions/checkout@v3
+      - name: 安装系统依赖
+        run: sudo apt-get install -y libseccomp-dev
       - uses: nixbuild/nix-quick-install-action@v21
-        with:
-         nix_conf: experimental-features = nix-command flakes
-
+        with:  # 修复参数名
+          extra_nix_config: |
+            build-users-group =
+            sandbox = false
+            experimental-features = nix-command flakes
       - run: nix build -v
       - uses: actions/upload-artifact@v4
         with:
@@ -44,11 +55,18 @@ jobs:
           path: result/app/*
   codegen:
     runs-on: ubuntu-latest
+    env:
+      NIX_IGNORE_SYSTEMD: 1
     steps:
       - uses: actions/checkout@v3
+      - name: 安装系统依赖
+        run: sudo apt-get install -y libseccomp-dev
       - uses: nixbuild/nix-quick-install-action@v21
-        with:
-         nix_conf: experimental-features = nix-command flakes
+        with:  # 参数名修正
+          extra_nix_config: |
+            build-users-group =
+            sandbox = false
+            experimental-features = nix-command flakes
       - run: nix develop -c flutter pub get
       - run: nix develop -c flutter pub run build_runner build -d
       - run: nix develop -c deps2nix
