@@ -13,6 +13,8 @@ jobs:
       - uses: nixbuild/nix-quick-install-action@v21
         with:
          nix_conf: experimental-features = nix-command flakes
+         extra_nix_config: |
+          build-users-group =
       - name: Write secrets 4 droid
         env:
           KEY_PROPERTIES: ${{ secrets.ANDROID_KEY_PROPERTIES }}
